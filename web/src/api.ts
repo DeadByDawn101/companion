@@ -98,6 +98,17 @@ export interface CompanionEnv {
   updatedAt: number;
 }
 
+
+export interface OpenClawHealth {
+  ok: boolean;
+  gatewayUrl: string;
+  host: string;
+  port: number;
+  protocol: string;
+  mode: string;
+  ts: number;
+}
+
 export interface DirEntry {
   name: string;
   path: string;
@@ -163,4 +174,8 @@ export const api = {
     del<{ removed: boolean; reason?: string }>("/git/worktree", { repoRoot, worktreePath, force }),
   gitPull: (cwd: string) =>
     post<{ success: boolean; output: string; git_ahead: number; git_behind: number }>("/git/pull", { cwd }),
+
+  // OpenClaw bridge
+  getOpenClawHealth: () => get<OpenClawHealth>("/openclaw/health"),
+  getOpenClawConfig: () => get<{ mode: string; gatewayUrl: string; relayUrl: string | null }>("/openclaw/config"),
 };

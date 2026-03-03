@@ -77,6 +77,7 @@ export function HomePage() {
   const [images, setImages] = useState<ImageAttachment[]>([]);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [openclawHealth, setOpenclawHealth] = useState<{ ok: boolean; gatewayUrl: string; mode: string } | null>(null);
 
   // Environment state
   const [envs, setEnvs] = useState<CompanionEnv[]>([]);
@@ -128,6 +129,7 @@ export function HomePage() {
       }
     }).catch(() => {});
     api.listEnvs().then(setEnvs).catch(() => {});
+    api.getOpenClawHealth().then((h) => setOpenclawHealth({ ok: h.ok, gatewayUrl: h.gatewayUrl, mode: h.mode })).catch(() => setOpenclawHealth(null));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Close dropdowns on outside click
