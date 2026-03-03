@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import net from "node:net";
+import { execFileSync } from "node:child_process";
 
 function parseGateway(url: string) {
   try {
@@ -11,6 +12,19 @@ function parseGateway(url: string) {
     };
   } catch {
     return { host: "127.0.0.1", port: 18789, protocol: "ws:" };
+  }
+}
+
+
+
+function listOpenClawSessions() {
+  try {
+    const out = execFileSync("openclaw", ["sessions", "list", "--json"], { encoding: "utf-8", timeout: 8000 });
+    const parsed = JSON.parse(out);
+    if (Array.isArray(parsed)) return parsed;
+    return parsed?.sessions || [];
+  } catch {
+    return [];
   }
 }
 
@@ -50,6 +64,11 @@ export function createOpenClawRoutes() {
       mode: process.env.OPENCLAW_MODE || "off",
       ts: Date.now(),
     }, ok ? 200 : 503);
+  });
+
+  api.get("/sessions", (c) => {
+    const sessions = listOpenClawSessions();
+    return c.json({ count: sessions.length, sessions });
   });
 
   api.get("/config", (c) => {

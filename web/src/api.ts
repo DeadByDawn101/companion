@@ -99,6 +99,11 @@ export interface CompanionEnv {
 }
 
 
+export interface OpenClawSessionList {
+  count: number;
+  sessions: Array<Record<string, unknown>>;
+}
+
 export interface OpenClawHealth {
   ok: boolean;
   gatewayUrl: string;
@@ -178,4 +183,5 @@ export const api = {
   // OpenClaw bridge
   getOpenClawHealth: () => get<OpenClawHealth>("/openclaw/health"),
   getOpenClawConfig: () => get<{ mode: string; gatewayUrl: string; relayUrl: string | null }>("/openclaw/config"),
+  getOpenClawSessions: () => get<OpenClawSessionList>("/openclaw/sessions"),
 };

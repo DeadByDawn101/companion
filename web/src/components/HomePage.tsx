@@ -78,6 +78,8 @@ export function HomePage() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [openclawHealth, setOpenclawHealth] = useState<{ ok: boolean; gatewayUrl: string; mode: string } | null>(null);
+  const [openclawSessionCount, setOpenclawSessionCount] = useState<number | null>(null);
+  const [openclawRelayUrl, setOpenclawRelayUrl] = useState<string>("");
 
   // Environment state
   const [envs, setEnvs] = useState<CompanionEnv[]>([]);
@@ -130,6 +132,8 @@ export function HomePage() {
     }).catch(() => {});
     api.listEnvs().then(setEnvs).catch(() => {});
     api.getOpenClawHealth().then((h) => setOpenclawHealth({ ok: h.ok, gatewayUrl: h.gatewayUrl, mode: h.mode })).catch(() => setOpenclawHealth(null));
+    api.getOpenClawConfig().then((cfg) => setOpenclawRelayUrl(cfg.relayUrl || "")).catch(() => {});
+    api.getOpenClawSessions().then((d) => setOpenclawSessionCount(d.count)).catch(() => setOpenclawSessionCount(null));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Close dropdowns on outside click
@@ -333,6 +337,20 @@ export function HomePage() {
             What would you like to build?
           </p>
         </div>
+
+
+        {openclawHealth && (
+          <div className={`mb-4 rounded-xl border px-4 py-3 text-sm ${openclawHealth.ok ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200" : "border-rose-500/30 bg-rose-500/10 text-rose-200"}`}>
+            <div className="font-medium">OpenClaw Bridge: {openclawHealth.ok ? "Connected" : "Disconnected"}</div>
+            <div className="opacity-80">mode={openclawHealth.mode} • {openclawHealth.gatewayUrl}</div>
+            <div className="opacity-80">sessions: {openclawSessionCount ?? "n/a"}</div>
+            {openclawRelayUrl && (
+              <div className="mt-2">
+                <a className="underline" href={`${openclawRelayUrl.replace(/\/$/,"")}/overview`} target="_blank" rel="noreferrer">Open OpenClaw Overview</a>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Recent project chips */}
         {recentDirs.length > 0 && (
