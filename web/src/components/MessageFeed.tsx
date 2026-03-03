@@ -500,7 +500,7 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
         <div className="text-center">
           <p className="text-sm text-cc-fg font-medium mb-1 font-display">Start a conversation</p>
           <p className="text-xs text-cc-muted leading-relaxed">
-            Send a message to begin working with Companion.
+            Send a message to begin working with Camila.
           </p>
         </div>
       </div>

@@ -338,10 +338,10 @@ export function HomePage() {
         {/* Title */}
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="font-display text-3xl sm:text-4xl font-semibold text-cc-fg tracking-tight mb-2" style={{ fontVariationSettings: "'SOFT' 100, 'WONK' 1" }}>
-            Companion
+            Camila
           </h1>
           <p className="text-sm text-cc-muted font-sans-ui">
-            What would you like to build?
+            Claude-grade flow, Camila identity.
           </p>
         </div>
 

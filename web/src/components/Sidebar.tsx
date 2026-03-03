@@ -426,8 +426,8 @@ export function Sidebar() {
       {/* Header */}
       <div className={`p-4 pb-3 ${isElectron ? "pt-10" : ""}`}>
         <div className="flex items-center gap-2.5 mb-4">
-          <img src={darkMode ? "/icon-dark.svg" : "/icon-light.svg"} alt="Companion" className="w-7 h-7 rounded-lg shadow-sm" />
-          <span className="text-sm font-semibold text-cc-fg tracking-tight font-display flex-1">Companion</span>
+          <img src={darkMode ? "/icon-dark.svg" : "/icon-light.svg"} alt="Camila" className="w-7 h-7 rounded-lg shadow-sm" />
+          <span className="text-sm font-semibold text-cc-fg tracking-tight font-display flex-1">Camila</span>
           <button
             onClick={toggleDarkMode}
             className="flex items-center justify-center w-7 h-7 rounded-lg text-cc-muted hover:text-cc-fg hover:bg-cc-hover transition-all duration-150 cursor-pointer btn-press"
@@ -444,6 +444,7 @@ export function Sidebar() {
             )}
           </button>
         </div>
+        <div className="text-[11px] text-cc-muted mb-3">Inspired by Claude-style UX · distinctly Camila</div>
 
         <button
           onClick={handleNewSession}
@@ -452,7 +453,7 @@ export function Sidebar() {
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
             <path d="M8 3v10M3 8h10" />
           </svg>
-          New Session
+          New Chat
         </button>
       </div>
 
