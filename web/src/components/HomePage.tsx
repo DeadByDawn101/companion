@@ -80,6 +80,7 @@ export function HomePage() {
   const [openclawHealth, setOpenclawHealth] = useState<{ ok: boolean; gatewayUrl: string; mode: string } | null>(null);
   const [openclawSessionCount, setOpenclawSessionCount] = useState<number | null>(null);
   const [openclawRelayUrl, setOpenclawRelayUrl] = useState<string>("");
+  const [openclawSessions, setOpenclawSessions] = useState<Array<Record<string, unknown>>>([]);
 
   // Environment state
   const [envs, setEnvs] = useState<CompanionEnv[]>([]);
@@ -118,6 +119,12 @@ export function HomePage() {
   const setCurrentSession = useStore((s) => s.setCurrentSession);
   const currentSessionId = useStore((s) => s.currentSessionId);
 
+  const refreshOpenClaw = useCallback(() => {
+    api.getOpenClawHealth().then((h) => setOpenclawHealth({ ok: h.ok, gatewayUrl: h.gatewayUrl, mode: h.mode })).catch(() => setOpenclawHealth(null));
+    api.getOpenClawConfig().then((cfg) => setOpenclawRelayUrl(cfg.relayUrl || "")).catch(() => {});
+    api.getOpenClawSessions().then((d) => { setOpenclawSessionCount(d.count); setOpenclawSessions(d.sessions || []); }).catch(() => { setOpenclawSessionCount(null); setOpenclawSessions([]); });
+  }, []);
+
   // Auto-focus textarea
   useEffect(() => {
     textareaRef.current?.focus();
@@ -131,10 +138,10 @@ export function HomePage() {
       }
     }).catch(() => {});
     api.listEnvs().then(setEnvs).catch(() => {});
-    api.getOpenClawHealth().then((h) => setOpenclawHealth({ ok: h.ok, gatewayUrl: h.gatewayUrl, mode: h.mode })).catch(() => setOpenclawHealth(null));
-    api.getOpenClawConfig().then((cfg) => setOpenclawRelayUrl(cfg.relayUrl || "")).catch(() => {});
-    api.getOpenClawSessions().then((d) => setOpenclawSessionCount(d.count)).catch(() => setOpenclawSessionCount(null));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    refreshOpenClaw();
+    const t = setInterval(refreshOpenClaw, 15000);
+    return () => clearInterval(t);
+  }, [refreshOpenClaw]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -344,9 +351,19 @@ export function HomePage() {
             <div className="font-medium">OpenClaw Bridge: {openclawHealth.ok ? "Connected" : "Disconnected"}</div>
             <div className="opacity-80">mode={openclawHealth.mode} • {openclawHealth.gatewayUrl}</div>
             <div className="opacity-80">sessions: {openclawSessionCount ?? "n/a"}</div>
-            {openclawRelayUrl && (
-              <div className="mt-2">
+            <div className="mt-2 flex items-center gap-3">
+              {openclawRelayUrl && (
                 <a className="underline" href={`${openclawRelayUrl.replace(/\/$/,"")}/overview`} target="_blank" rel="noreferrer">Open OpenClaw Overview</a>
+              )}
+              <button onClick={refreshOpenClaw} className="text-xs underline opacity-90 hover:opacity-100">Refresh</button>
+            </div>
+            {openclawSessions.length > 0 && (
+              <div className="mt-2 max-h-28 overflow-auto rounded-md border border-white/10 bg-black/10 p-2 text-xs">
+                {openclawSessions.slice(0, 6).map((ses, idx) => (
+                  <div key={idx} className="mb-1 truncate">
+                    {(ses.label || ses.sessionKey || ses.id || "session") as string}
+                  </div>
+                ))}
               </div>
             )}
           </div>
