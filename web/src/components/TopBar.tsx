@@ -101,6 +101,11 @@ export function TopBar() {
             </div>
           )}
 
+          {/* Identity badge */}
+          <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-md bg-cc-primary/10 text-[11px] font-medium text-cc-primary">
+            Camila · Claude-style
+          </span>
+
           {/* Model badge */}
           {model && (
             <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md bg-cc-hover text-[11px] font-medium text-cc-muted font-mono-code">

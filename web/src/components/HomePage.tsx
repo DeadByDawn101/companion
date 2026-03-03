@@ -452,7 +452,7 @@ export function HomePage() {
             onChange={handleInput}
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}
-            placeholder="Fix a bug, build a feature, refactor code..."
+            placeholder="Ask like Claude, build with Camila — code, plans, and execution..."
             rows={4}
             className="w-full px-5 pt-5 pb-2 text-[15px] bg-transparent resize-none focus:outline-none text-cc-fg font-sans-ui placeholder:text-cc-muted/60 leading-relaxed"
             style={{ minHeight: "110px", maxHeight: "300px" }}
