@@ -9,9 +9,11 @@ import type { SessionStore } from "./session-store.js";
 import type { WorktreeTracker } from "./worktree-tracker.js";
 import * as envManager from "./env-manager.js";
 import * as gitUtils from "./git-utils.js";
+import { createOpenClawRoutes } from "./openclaw-routes.js";
 
 export function createRoutes(launcher: CliLauncher, wsBridge: WsBridge, sessionStore: SessionStore, worktreeTracker: WorktreeTracker) {
   const api = new Hono();
+  api.route("/openclaw", createOpenClawRoutes());
 
   // ─── SDK Sessions (--sdk-url) ─────────────────────────────────────
 
