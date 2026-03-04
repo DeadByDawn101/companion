@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useStore } from "../store.js";
 import { api } from "../api.js";
 import { sendToSession } from "../ws.js";
@@ -17,7 +18,7 @@ function folderName(cwd?: string): string {
   return cwd.split("/").pop() || cwd;
 }
 
-const MODEL_OPTIONS = [
+const DEFAULT_MODELS = [
   "anthropic/claude-sonnet-4-6",
   "anthropic/claude-opus-4-5",
   "google/gemini-2.0-flash",
@@ -47,8 +48,15 @@ export function TopBar() {
   const sister = currentSessionId ? (sessionSister.get(currentSessionId) || "camila") : "camila";
   const cwd = sessionData?.cwd;
 
+  const [customModelInput, setCustomModelInput] = useState("");
+  const [showModelEditor, setShowModelEditor] = useState(false);
+  const customModels = (() => {
+    try { return JSON.parse(localStorage.getItem("cc-custom-models") || "[]") as string[]; } catch { return []; }
+  })();
+  const modelOptions = Array.from(new Set([...DEFAULT_MODELS, ...customModels]));
+
   return (
-    <header className={`shrink-0 flex items-center justify-between px-4 py-2.5 bg-cc-card/80 glass border-b border-cc-border ${isElectron ? "pl-20" : ""}`} style={isElectron ? { WebkitAppRegion: "drag" } as React.CSSProperties : undefined}>
+    <header className={`relative shrink-0 flex items-center justify-between px-4 py-2.5 bg-cc-card/80 glass border-b border-cc-border ${isElectron ? "pl-20" : ""}`} style={isElectron ? { WebkitAppRegion: "drag" } as React.CSSProperties : undefined}>
       <div className="flex items-center gap-3 min-w-0" style={isElectron ? { WebkitAppRegion: "no-drag" } as React.CSSProperties : undefined}>
         {/* Sidebar toggle */}
         <button
@@ -127,18 +135,27 @@ export function TopBar() {
           )}
 
           {currentSessionId && (
-            <select
-              value={model || MODEL_OPTIONS[0]}
-              onChange={(e) => {
-                const next = e.target.value;
-                sendToSession(currentSessionId, { type: "set_model", model: next });
-                useStore.getState().updateSession(currentSessionId, { model: next });
-              }}
-              className="hidden md:inline-flex h-7 text-[11px] rounded-md border border-cc-border bg-cc-card px-2 text-cc-muted focus:outline-none"
-              title="Change model"
-            >
-              {MODEL_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
-            </select>
+            <>
+              <select
+                value={model || DEFAULT_MODELS[0]}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  sendToSession(currentSessionId, { type: "set_model", model: next });
+                  useStore.getState().updateSession(currentSessionId, { model: next });
+                }}
+                className="hidden md:inline-flex h-7 text-[11px] rounded-md border border-cc-border bg-cc-card px-2 text-cc-muted focus:outline-none"
+                title="Change model"
+              >
+                {modelOptions.map((m) => <option key={m} value={m}>{m}</option>)}
+              </select>
+              <button
+                onClick={() => setShowModelEditor((v) => !v)}
+                className="hidden md:inline-flex h-7 px-2 text-[11px] rounded-md border border-cc-border bg-cc-card text-cc-muted hover:text-cc-fg"
+                title="Manage model presets"
+              >
+                +model
+              </button>
+            </>
           )}
 
           {currentSessionId && (
@@ -150,6 +167,30 @@ export function TopBar() {
             >
               {SISTER_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
+          )}
+
+          {showModelEditor && (
+            <div className="absolute right-20 top-11 z-30 w-72 rounded-xl border border-cc-border bg-cc-card shadow-dropdown p-2" style={isElectron ? { WebkitAppRegion: "no-drag" } as React.CSSProperties : undefined}>
+              <div className="text-[11px] text-cc-muted mb-1">Add custom model preset</div>
+              <div className="flex gap-1">
+                <input
+                  value={customModelInput}
+                  onChange={(e) => setCustomModelInput(e.target.value)}
+                  placeholder="provider/model"
+                  className="flex-1 h-8 px-2 text-xs rounded-md border border-cc-border bg-cc-bg text-cc-fg focus:outline-none"
+                />
+                <button
+                  onClick={() => {
+                    const v = customModelInput.trim();
+                    if (!v) return;
+                    const next = Array.from(new Set([...(customModels || []), v]));
+                    localStorage.setItem("cc-custom-models", JSON.stringify(next));
+                    setCustomModelInput("");
+                  }}
+                  className="h-8 px-2 text-xs rounded-md bg-cc-primary text-white"
+                >Add</button>
+              </div>
+            </div>
           )}
 
           <button

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useStore } from "../store.js";
 import type { TaskItem } from "../types.js";
 
@@ -9,11 +10,18 @@ export function TaskPanel({ sessionId }: { sessionId: string }) {
   const taskPanelOpen = useStore((s) => s.taskPanelOpen);
   const sister = useStore((s) => s.sessionSister.get(sessionId) || "camila");
   const setTaskPanelOpen = useStore((s) => s.setTaskPanelOpen);
+  const [capFilter, setCapFilter] = useState("");
+  const [showAllTools, setShowAllTools] = useState(false);
+  const [showAllSkills, setShowAllSkills] = useState(false);
 
   if (!taskPanelOpen) return null;
 
   const completedCount = tasks.filter((t) => t.status === "completed").length;
   const contextPct = session?.context_used_percent ?? 0;
+  const toolsAll = (session?.tools || []).filter((x) => x.toLowerCase().includes(capFilter.toLowerCase()));
+  const skillsAll = (session?.skills || []).filter((x) => x.toLowerCase().includes(capFilter.toLowerCase()));
+  const toolsView = showAllTools ? toolsAll : toolsAll.slice(0, 10);
+  const skillsView = showAllSkills ? skillsAll : skillsAll.slice(0, 10);
 
   return (
     <aside className="w-[280px] h-full flex flex-col bg-cc-card border-l border-cc-border">
@@ -91,22 +99,51 @@ export function TaskPanel({ sessionId }: { sessionId: string }) {
 
       {session && (
         <div className="shrink-0 px-4 py-3 border-b border-cc-border space-y-2">
+          <div className="flex items-center gap-2">
+            <input
+              value={capFilter}
+              onChange={(e) => setCapFilter(e.target.value)}
+              placeholder="Filter tools/skills"
+              className="flex-1 h-7 px-2 text-[11px] rounded-md border border-cc-border bg-cc-bg text-cc-fg focus:outline-none"
+            />
+            <button
+              onClick={() => {
+                const text = `Tools:
+${(session.tools || []).join("\n")}\n\nSkills:
+${(session.skills || []).join("\n")}`;
+                const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `camila-capabilities-${sessionId.slice(0,8)}.txt`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              className="h-7 px-2 text-[11px] rounded-md border border-cc-border text-cc-muted hover:text-cc-fg hover:bg-cc-hover"
+            >Copy</button>
+          </div>
           <div>
-            <div className="text-[11px] text-cc-muted uppercase tracking-wider font-medium mb-1">Tools</div>
+            <div className="text-[11px] text-cc-muted uppercase tracking-wider font-medium mb-1 flex items-center justify-between">
+              <span>Tools</span>
+              {(toolsAll.length > 10) && <button onClick={() => setShowAllTools((v) => !v)} className="text-[10px] text-cc-primary">{showAllTools ? "Show less" : `Show all (${toolsAll.length})`}</button>}
+            </div>
             <div className="flex flex-wrap gap-1">
-              {(session.tools || []).slice(0, 10).map((t) => (
+              {toolsView.map((t) => (
                 <span key={t} className="text-[10px] px-1.5 py-0.5 rounded bg-cc-hover text-cc-muted font-mono-code">{t}</span>
               ))}
-              {(session.tools || []).length === 0 && <span className="text-[10px] text-cc-muted">No tools reported</span>}
+              {toolsAll.length === 0 && <span className="text-[10px] text-cc-muted">No tools reported</span>}
             </div>
           </div>
           <div>
-            <div className="text-[11px] text-cc-muted uppercase tracking-wider font-medium mb-1">Skills</div>
+            <div className="text-[11px] text-cc-muted uppercase tracking-wider font-medium mb-1 flex items-center justify-between">
+              <span>Skills</span>
+              {(skillsAll.length > 10) && <button onClick={() => setShowAllSkills((v) => !v)} className="text-[10px] text-cc-primary">{showAllSkills ? "Show less" : `Show all (${skillsAll.length})`}</button>}
+            </div>
             <div className="flex flex-wrap gap-1">
-              {(session.skills || []).slice(0, 10).map((k) => (
+              {skillsView.map((k) => (
                 <span key={k} className="text-[10px] px-1.5 py-0.5 rounded bg-cc-primary/10 text-cc-primary font-mono-code">{k}</span>
               ))}
-              {(session.skills || []).length === 0 && <span className="text-[10px] text-cc-muted">No skills reported</span>}
+              {skillsAll.length === 0 && <span className="text-[10px] text-cc-muted">No skills reported</span>}
             </div>
           </div>
         </div>

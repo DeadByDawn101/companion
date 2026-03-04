@@ -12,6 +12,7 @@ export function ChatView({ sessionId }: { sessionId: string }) {
   );
   const cliConnected = useStore((s) => s.cliConnected.get(sessionId) ?? false);
   const session = useStore((s) => s.sessions.get(sessionId));
+  const sister = useStore((s) => s.sessionSister.get(sessionId) || "camila");
   const contextPercent = (session as { context_used_percent?: number } | undefined)?.context_used_percent ?? 0;
 
   const perms = useMemo(
@@ -60,6 +61,12 @@ export function ChatView({ sessionId }: { sessionId: string }) {
           </span>
         </div>
       )}
+
+      <div className="px-4 py-1.5 border-b border-cc-border/60 bg-cc-card/50">
+        <span className="inline-flex items-center gap-1.5 text-[11px] px-2 py-0.5 rounded-md bg-cc-primary/10 text-cc-primary">
+          Camila core {sister !== "camila" ? `· ${sister} advisory` : "· direct"}
+        </span>
+      </div>
 
       {/* Message feed */}
       <MessageFeed sessionId={sessionId} />
