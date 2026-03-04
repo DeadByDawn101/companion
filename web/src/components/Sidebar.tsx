@@ -23,6 +23,9 @@ export function Sidebar() {
   const [confirmArchiveId, setConfirmArchiveId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [hiddenSessionIds, setHiddenSessionIds] = useState<Set<string>>(new Set());
+  const [favoriteSessionIds, setFavoriteSessionIds] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem("cc-favorite-sessions") || "[]")); } catch { return new Set(); }
+  });
   const archiveTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const debouncedSearch = useDebouncedValue(searchQuery, 200);
   const editInputRef = useRef<HTMLInputElement>(null);
@@ -69,6 +72,17 @@ export function Sidebar() {
     if (window.innerWidth < 768) {
       useStore.getState().setSidebarOpen(false);
     }
+  }
+
+
+  function toggleFavorite(sessionId: string) {
+    setFavoriteSessionIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(sessionId)) next.delete(sessionId);
+      else next.add(sessionId);
+      try { localStorage.setItem("cc-favorite-sessions", JSON.stringify(Array.from(next))); } catch {}
+      return next;
+    });
   }
 
   function handleNewSession() {
@@ -235,7 +249,12 @@ export function Sidebar() {
       createdAt: sdkInfo?.createdAt ?? 0,
       archived: sdkInfo?.archived ?? false,
     };
-  }).sort((a, b) => b.createdAt - a.createdAt);
+  }).sort((a, b) => {
+    const af = favoriteSessionIds.has(a.id) ? 1 : 0;
+    const bf = favoriteSessionIds.has(b.id) ? 1 : 0;
+    if (af !== bf) return bf - af;
+    return b.createdAt - a.createdAt;
+  });
 
   const filteredSessionList = useMemo(() => {
     // Hide optimistically archived sessions
@@ -313,6 +332,15 @@ export function Sidebar() {
                 <span className="absolute inset-0 w-2 h-2 rounded-full bg-cc-success/40 animate-[pulse-dot_1.5s_ease-in-out_infinite]" />
               )}
             </span>
+            <button
+              onClick={(e) => { e.stopPropagation(); toggleFavorite(s.id); }}
+              className={`shrink-0 p-0.5 rounded ${favoriteSessionIds.has(s.id) ? "text-amber-500" : "text-cc-muted/60 hover:text-amber-500"}`}
+              title={favoriteSessionIds.has(s.id) ? "Unfavorite" : "Favorite"}
+            >
+              <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
+                <path d="M8 1l1.9 3.9 4.3.6-3.1 3 .7 4.3L8 10.9l-3.8 1.9.7-4.3-3.1-3 4.3-.6L8 1z" />
+              </svg>
+            </button>
             {isEditing ? (
               <input
                 ref={editInputRef}

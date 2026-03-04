@@ -460,8 +460,15 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isNearBottom = useRef(true);
   const [elapsed, setElapsed] = useState(0);
+  const [search, setSearch] = useState("");
 
-  const grouped = useMemo(() => groupMessages(messages), [messages]);
+  const filteredMessages = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return messages;
+    return messages.filter((m) => (m.content || "").toLowerCase().includes(q));
+  }, [messages, search]);
+
+  const grouped = useMemo(() => groupMessages(filteredMessages), [filteredMessages]);
 
   // Tick elapsed time every second while generating
   useEffect(() => {
@@ -487,6 +494,28 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages.length, streamingText]);
+
+  function exportMarkdown() {
+    const lines: string[] = [];
+    lines.push(`# Camila Session Export`);
+    lines.push("");
+    lines.push(`- session: ${sessionId}`);
+    lines.push(`- exported: ${new Date().toISOString()}`);
+    lines.push("");
+    for (const m of messages) {
+      const role = m.role.toUpperCase();
+      lines.push(`## ${role}`);
+      if (m.content) lines.push(m.content);
+      lines.push("");
+    }
+    const blob = new Blob([lines.join("\n")], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `camila-session-${sessionId.slice(0,8)}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   if (messages.length === 0 && !streamingText) {
     return (
@@ -515,8 +544,21 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
         className="h-full overflow-y-auto scroll-smooth px-4 sm:px-6 py-5 sm:py-7"
       >
         <div className="max-w-[46rem] mx-auto space-y-4 sm:space-y-6">
+          <div className="sticky top-0 z-10 -mx-1 px-1 py-1 bg-gradient-to-b from-cc-bg via-cc-bg/90 to-transparent">
+            <div className="flex items-center gap-2">
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search this chat..."
+                className="flex-1 h-8 px-2.5 text-xs rounded-lg border border-cc-border bg-cc-card text-cc-fg placeholder:text-cc-muted focus:outline-none focus:border-cc-primary/30"
+              />
+              <button onClick={exportMarkdown} className="h-8 px-2.5 text-xs rounded-lg border border-cc-border hover:bg-cc-hover text-cc-muted hover:text-cc-fg cursor-pointer">Export .md</button>
+            </div>
+          </div>
           <CopyAllButton sessionId={sessionId} />
-          <FeedEntries entries={grouped} />
+          {grouped.length > 0 ? <FeedEntries entries={grouped} /> : (
+            <div className="text-xs text-cc-muted px-1">No messages match “{search}”.</div>
+          )}
 
           {/* Retry button */}
           {!streamingText && <RetryButton sessionId={sessionId} />}
