@@ -348,4 +348,7 @@
 /* Camila surface polish */
 .chat-surface {
   letter-spacing: 0.005em;
+  word-spacing: 0.01em;
 }
+
+.markdown-body p { text-wrap: pretty; }

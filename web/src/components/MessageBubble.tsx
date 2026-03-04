@@ -75,7 +75,7 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
 
   // Assistant message
   return (
-    <div className="animate-[fadeSlideIn_0.2s_ease-out] group/msg">
+    <div className="animate-[fadeSlideIn_0.2s_ease-out] group/msg chat-surface">
       <AssistantMessage message={message} />
     </div>
   );
@@ -86,7 +86,7 @@ function UserMessage({ message }: { message: ChatMessage }) {
 
   return (
     <div className="flex justify-end animate-[fadeSlideIn_0.2s_ease-out]">
-      <div className="max-w-[80%] px-4 py-3 rounded-2xl rounded-br-[6px] bg-cc-user-bubble text-cc-fg shadow-sm">
+      <div className="max-w-[78%] px-4 py-3 rounded-2xl rounded-br-[8px] bg-cc-user-bubble text-cc-fg shadow-card">
         {message.images && message.images.length > 0 && (
           <div className="flex gap-2 flex-wrap mb-2">
             {message.images.map((img, i) => (
@@ -100,7 +100,7 @@ function UserMessage({ message }: { message: ChatMessage }) {
             ))}
           </div>
         )}
-        <pre className="text-[14px] whitespace-pre-wrap break-words font-sans-ui leading-relaxed">
+        <pre className="text-[14px] whitespace-pre-wrap break-words font-sans-ui leading-relaxed tracking-[0.003em]">
           {message.content}
         </pre>
       </div>
@@ -182,10 +182,8 @@ function AssistantMessage({ message }: { message: ChatMessage }) {
 
 function AssistantAvatar() {
   return (
-    <div className="w-6 h-6 rounded-lg bg-cc-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-      <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 text-cc-primary">
-        <circle cx="8" cy="8" r="3" />
-      </svg>
+    <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-cc-primary/20 to-cc-primary/5 border border-cc-primary/20 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+      <span className="text-[10px] font-semibold text-cc-primary font-sans-ui">C</span>
     </div>
   );
 }
@@ -209,7 +207,7 @@ function HighlightedCode({ code, lang }: { code: string; lang: string }) {
 
 function MarkdownContent({ text }: { text: string }) {
   return (
-    <div className="markdown-body text-[15px] text-cc-fg leading-[1.7]">
+    <div className="markdown-body text-[15px] text-cc-fg leading-[1.72] tracking-[0.002em]">
       <Markdown
         remarkPlugins={[remarkGfm]}
         components={{

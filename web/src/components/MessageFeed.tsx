@@ -500,7 +500,7 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
         <div className="text-center">
           <p className="text-sm text-cc-fg font-medium mb-1 font-display">Start a conversation</p>
           <p className="text-xs text-cc-muted leading-relaxed">
-            Send a message to begin working with Camila.
+            Start with a prompt — Camila will run with it.
           </p>
         </div>
       </div>
@@ -512,9 +512,9 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className="h-full overflow-y-auto scroll-smooth px-3 sm:px-4 py-4 sm:py-6"
+        className="h-full overflow-y-auto scroll-smooth px-4 sm:px-6 py-5 sm:py-7"
       >
-        <div className="max-w-3xl mx-auto space-y-3 sm:space-y-5">
+        <div className="max-w-[46rem] mx-auto space-y-4 sm:space-y-6">
           <CopyAllButton sessionId={sessionId} />
           <FeedEntries entries={grouped} />
 
@@ -525,7 +525,7 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
           {streamingText && (
             <div className="animate-[fadeSlideIn_0.2s_ease-out]">
               <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-lg bg-cc-primary/10 flex items-center justify-center shrink-0 mt-0.5 animate-[breathe_2s_ease-in-out_infinite]">
+                <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-cc-primary/20 to-cc-primary/5 border border-cc-primary/20 flex items-center justify-center shrink-0 mt-0.5 animate-[breathe_2s_ease-in-out_infinite]">
                   <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 text-cc-primary">
                     <path d="M8 1v14M1 8h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                   </svg>
