@@ -29,6 +29,10 @@ interface CommandItem {
   type: "command" | "skill";
 }
 
+function draftKey(sessionId: string): string {
+  return `cc-draft-${sessionId}`;
+}
+
 export function Composer({ sessionId }: { sessionId: string }) {
   const [text, setText] = useState("");
   const [images, setImages] = useState<ImageAttachment[]>([]);
@@ -44,6 +48,34 @@ export function Composer({ sessionId }: { sessionId: string }) {
   const isConnected = cliConnected.get(sessionId) ?? false;
   const currentMode = sessionData?.permissionMode || "acceptEdits";
   const isPlan = currentMode === "plan";
+
+  // Restore draft for this session
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(draftKey(sessionId));
+      if (saved) {
+        setText(saved);
+        requestAnimationFrame(() => {
+          if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+            textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 200) + "px";
+          }
+        });
+      }
+    } catch {
+      // ignore localStorage errors
+    }
+  }, [sessionId]);
+
+  // Persist draft as user types
+  useEffect(() => {
+    try {
+      if (text.trim()) localStorage.setItem(draftKey(sessionId), text);
+      else localStorage.removeItem(draftKey(sessionId));
+    } catch {
+      // ignore localStorage errors
+    }
+  }, [sessionId, text]);
 
   // Build command list from session data
   const allCommands = useMemo<CommandItem[]>(() => {
@@ -128,6 +160,7 @@ export function Composer({ sessionId }: { sessionId: string }) {
     setText("");
     setImages([]);
     setSlashMenuOpen(false);
+    try { localStorage.removeItem(draftKey(sessionId)); } catch {}
 
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -324,7 +357,7 @@ export function Composer({ sessionId }: { sessionId: string }) {
             onChange={handleInput}
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}
-            placeholder={isConnected ? "Type a message... (/ for commands)" : "Waiting for CLI connection..."}
+            placeholder={isConnected ? "Message Camila… (/ for commands)" : "Waiting for CLI connection..."}
             disabled={!isConnected}
             rows={1}
             className="w-full px-4 pt-3 pb-1 text-sm bg-transparent resize-none focus:outline-none text-cc-fg font-sans-ui placeholder:text-cc-muted disabled:opacity-50"
@@ -407,6 +440,19 @@ export function Composer({ sessionId }: { sessionId: string }) {
 
             {/* Right: image + send/stop */}
             <div className="flex items-center gap-1">
+              {text.trim().length > 0 && (
+                <button
+                  onClick={() => { setText(""); try { localStorage.removeItem(draftKey(sessionId)); } catch {}; if (textareaRef.current) textareaRef.current.style.height = "auto"; }}
+                  disabled={!isConnected}
+                  className="flex items-center justify-center w-8 h-8 rounded-lg text-cc-muted hover:text-cc-fg hover:bg-cc-hover cursor-pointer"
+                  title="Clear draft"
+                >
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-4 h-4">
+                    <path d="M3 3l10 10M13 3L3 13" strokeLinecap="round" />
+                  </svg>
+                </button>
+              )}
+
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={!isConnected}
@@ -461,6 +507,7 @@ export function Composer({ sessionId }: { sessionId: string }) {
             <span><kbd className="font-mono-code">Shift+Enter</kbd> newline</span>
             <span><kbd className="font-mono-code">/</kbd> commands</span>
             <span><kbd className="font-mono-code">Shift+Tab</kbd> toggle mode</span>
+            <span>draft autosaves</span>
           </div>
         )}
       </div>
