@@ -44,6 +44,7 @@ export function Composer({ sessionId }: { sessionId: string }) {
   const cliConnected = useStore((s) => s.cliConnected);
   const sessionData = useStore((s) => s.sessions.get(sessionId));
   const previousMode = useStore((s) => s.previousPermissionMode.get(sessionId) || "acceptEdits");
+  const sister = useStore((s) => s.sessionSister.get(sessionId) || "camila");
 
   const isConnected = cliConnected.get(sessionId) ?? false;
   const currentMode = sessionData?.permissionMode || "acceptEdits";
@@ -142,9 +143,13 @@ export function Composer({ sessionId }: { sessionId: string }) {
     const msg = text.trim();
     if (!msg || !isConnected) return;
 
+    const sisterPrompt = sister !== "camila"
+      ? `As Camila, consult ${sister} as an advisory lens while keeping Camila voice and ownership.\n\nUser request: ${msg}`
+      : msg;
+
     sendToSession(sessionId, {
       type: "user_message",
-      content: msg,
+      content: sisterPrompt,
       session_id: sessionId,
       images: images.length > 0 ? images.map((img) => ({ media_type: img.mediaType, data: img.base64 })) : undefined,
     });
@@ -437,6 +442,7 @@ export function Composer({ sessionId }: { sessionId: string }) {
               )}
               <span>{isPlan ? "plan mode" : "accept edits"}</span>
             </button>
+            <span className="text-[11px] text-cc-muted px-2 py-1 rounded-md bg-cc-hover/60">voice: {sister}</span>
 
             {/* Right: image + send/stop */}
             <div className="flex items-center gap-1">

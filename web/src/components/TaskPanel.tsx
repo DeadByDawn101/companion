@@ -7,6 +7,7 @@ export function TaskPanel({ sessionId }: { sessionId: string }) {
   const tasks = useStore((s) => s.sessionTasks.get(sessionId) || EMPTY_TASKS);
   const session = useStore((s) => s.sessions.get(sessionId));
   const taskPanelOpen = useStore((s) => s.taskPanelOpen);
+  const sister = useStore((s) => s.sessionSister.get(sessionId) || "camila");
   const setTaskPanelOpen = useStore((s) => s.setTaskPanelOpen);
 
   if (!taskPanelOpen) return null;
@@ -70,6 +71,12 @@ export function TaskPanel({ sessionId }: { sessionId: string }) {
             </span>
           </div>
 
+          {/* Voice */}
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-cc-muted uppercase tracking-wider font-medium">Voice</span>
+            <span className="text-[11px] font-medium text-cc-fg font-mono-code">camila + {sister}</span>
+          </div>
+
           {/* Model */}
           {session.model && (
             <div className="flex items-center justify-between">
@@ -79,6 +86,29 @@ export function TaskPanel({ sessionId }: { sessionId: string }) {
               </span>
             </div>
           )}
+        </div>
+      )}
+
+      {session && (
+        <div className="shrink-0 px-4 py-3 border-b border-cc-border space-y-2">
+          <div>
+            <div className="text-[11px] text-cc-muted uppercase tracking-wider font-medium mb-1">Tools</div>
+            <div className="flex flex-wrap gap-1">
+              {(session.tools || []).slice(0, 10).map((t) => (
+                <span key={t} className="text-[10px] px-1.5 py-0.5 rounded bg-cc-hover text-cc-muted font-mono-code">{t}</span>
+              ))}
+              {(session.tools || []).length === 0 && <span className="text-[10px] text-cc-muted">No tools reported</span>}
+            </div>
+          </div>
+          <div>
+            <div className="text-[11px] text-cc-muted uppercase tracking-wider font-medium mb-1">Skills</div>
+            <div className="flex flex-wrap gap-1">
+              {(session.skills || []).slice(0, 10).map((k) => (
+                <span key={k} className="text-[10px] px-1.5 py-0.5 rounded bg-cc-primary/10 text-cc-primary font-mono-code">{k}</span>
+              ))}
+              {(session.skills || []).length === 0 && <span className="text-[10px] text-cc-muted">No skills reported</span>}
+            </div>
+          </div>
         </div>
       )}
 

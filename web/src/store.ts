@@ -44,6 +44,9 @@ interface AppState {
   // Session display names
   sessionNames: Map<string, string>;
 
+  // Sister advisor per session
+  sessionSister: Map<string, string>;
+
   // UI
   darkMode: boolean;
   sidebarOpen: boolean;
@@ -95,6 +98,7 @@ interface AppState {
 
   // Session name actions
   setSessionName: (sessionId: string, name: string) => void;
+  setSessionSister: (sessionId: string, sister: string) => void;
 
   // Plan mode actions
   setPreviousPermissionMode: (sessionId: string, mode: string) => void;
@@ -119,6 +123,15 @@ interface AppState {
   setTaskPanelWidth: (width: number) => void;
 
   reset: () => void;
+}
+
+function getInitialSessionSister(): Map<string, string> {
+  if (typeof window === "undefined") return new Map();
+  try {
+    return new Map(JSON.parse(localStorage.getItem("cc-session-sister") || "[]"));
+  } catch {
+    return new Map();
+  }
 }
 
 function getInitialSessionNames(): Map<string, string> {
@@ -169,6 +182,7 @@ export const useStore = create<AppState>((set) => ({
   previousPermissionMode: new Map(),
   sessionTasks: new Map(),
   sessionNames: getInitialSessionNames(),
+  sessionSister: getInitialSessionSister(),
   darkMode: getInitialDarkMode(),
   sidebarOpen: typeof window !== "undefined" ? window.innerWidth >= 768 : true,
   taskPanelOpen: typeof window !== "undefined" ? window.innerWidth >= 1024 : false,
@@ -249,6 +263,9 @@ export const useStore = create<AppState>((set) => ({
       const sessionNames = new Map(s.sessionNames);
       sessionNames.delete(sessionId);
       localStorage.setItem("cc-session-names", JSON.stringify(Array.from(sessionNames.entries())));
+      const sessionSister = new Map(s.sessionSister);
+      sessionSister.delete(sessionId);
+      localStorage.setItem("cc-session-sister", JSON.stringify(Array.from(sessionSister.entries())));
       if (s.currentSessionId === sessionId) {
         localStorage.removeItem("cc-current-session");
       }
@@ -265,6 +282,7 @@ export const useStore = create<AppState>((set) => ({
         pendingPermissions,
         sessionTasks,
         sessionNames,
+        sessionSister,
         sdkSessions: s.sdkSessions.filter((sdk) => sdk.sessionId !== sessionId),
         currentSessionId: s.currentSessionId === sessionId ? null : s.currentSessionId,
       };
@@ -383,6 +401,14 @@ export const useStore = create<AppState>((set) => ({
       return { sessionNames };
     }),
 
+  setSessionSister: (sessionId, sister) =>
+    set((s) => {
+      const sessionSister = new Map(s.sessionSister);
+      sessionSister.set(sessionId, sister);
+      localStorage.setItem("cc-session-sister", JSON.stringify(Array.from(sessionSister.entries())));
+      return { sessionSister };
+    }),
+
   setPreviousPermissionMode: (sessionId, mode) =>
     set((s) => {
       const previousPermissionMode = new Map(s.previousPermissionMode);
@@ -451,5 +477,6 @@ export const useStore = create<AppState>((set) => ({
       previousPermissionMode: new Map(),
       sessionTasks: new Map(),
       sessionNames: new Map(),
+      sessionSister: new Map(),
     }),
 }));

@@ -36,6 +36,16 @@ const MODES = [
   { value: "plan", label: "Plan" },
 ];
 
+const SISTERS = [
+  { value: "camila", label: "Camila (default)" },
+  { value: "maya", label: "Maya (trading)" },
+  { value: "sheila", label: "Sheila (marketing)" },
+  { value: "aria", label: "Aria (growth)" },
+  { value: "nova", label: "Nova (infra)" },
+  { value: "zara", label: "Zara (product)" },
+  { value: "iris", label: "Iris (culture)" },
+];
+
 const RECENT_DIRS_KEY = "cc-recent-dirs";
 
 function getRecentDirs(): string[] {
@@ -73,6 +83,7 @@ export function HomePage() {
   const [text, setText] = useState("");
   const [model, setModel] = useState(MODELS[0].value);
   const [mode, setMode] = useState(MODES[0].value);
+  const [sister, setSister] = useState("camila");
   const [cwd, setCwd] = useState(() => getRecentDirs()[0] || "");
   const [images, setImages] = useState<ImageAttachment[]>([]);
   const [sending, setSending] = useState(false);
@@ -300,6 +311,7 @@ export function HomePage() {
 
       // Store the permission mode for this session
       useStore.getState().setPreviousPermissionMode(sessionId, mode);
+      useStore.getState().setSessionSister(sessionId, sister);
 
       // Switch to session
       setCurrentSession(sessionId);
@@ -924,7 +936,21 @@ export function HomePage() {
           </div>
         )}
 
-        {/* Error message */}
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="flex items-center gap-2 rounded-lg border border-cc-border bg-cc-card px-3 py-2">
+            <span className="text-[11px] text-cc-muted uppercase tracking-wide">Voice</span>
+            <select value={sister} onChange={(e) => setSister(e.target.value)} className="flex-1 bg-transparent text-sm text-cc-fg focus:outline-none">
+              {SISTERS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center rounded-lg border border-cc-border bg-cc-card px-3 py-2 text-[12px] text-cc-muted">
+            Always Camila core. Sister acts as advisory lens.
+          </div>
+        </div>
+
+                {/* Error message */}
         {error && (
           <div className="mt-3 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cc-error/5 border border-cc-error/20 animate-[fadeSlideIn_0.2s_ease-out]">
             <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 text-cc-error shrink-0">

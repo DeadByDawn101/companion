@@ -1,5 +1,6 @@
 import { useStore } from "../store.js";
 import { api } from "../api.js";
+import { sendToSession } from "../ws.js";
 
 const isElectron = !!(window as any).electronAPI?.isElectron;
 
@@ -16,6 +17,16 @@ function folderName(cwd?: string): string {
   return cwd.split("/").pop() || cwd;
 }
 
+const MODEL_OPTIONS = [
+  "anthropic/claude-sonnet-4-6",
+  "anthropic/claude-opus-4-5",
+  "google/gemini-2.0-flash",
+  "openrouter/auto",
+  "xai/grok-4",
+];
+
+const SISTER_OPTIONS = ["camila", "maya", "sheila", "aria", "nova", "zara", "iris"];
+
 export function TopBar() {
   const currentSessionId = useStore((s) => s.currentSessionId);
   const cliConnected = useStore((s) => s.cliConnected);
@@ -26,12 +37,14 @@ export function TopBar() {
   const setTaskPanelOpen = useStore((s) => s.setTaskPanelOpen);
   const sessionNames = useStore((s) => s.sessionNames);
   const sessions = useStore((s) => s.sessions);
+  const sessionSister = useStore((s) => s.sessionSister);
 
   const isConnected = currentSessionId ? (cliConnected.get(currentSessionId) ?? false) : false;
   const status = currentSessionId ? (sessionStatus.get(currentSessionId) ?? null) : null;
   const sessionName = currentSessionId ? sessionNames.get(currentSessionId) : null;
   const sessionData = currentSessionId ? sessions.get(currentSessionId) : null;
   const model = sessionData?.model;
+  const sister = currentSessionId ? (sessionSister.get(currentSessionId) || "camila") : "camila";
   const cwd = sessionData?.cwd;
 
   return (
@@ -111,6 +124,32 @@ export function TopBar() {
             <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md bg-cc-hover text-[11px] font-medium text-cc-muted font-mono-code">
               {modelShortName(model)}
             </span>
+          )}
+
+          {currentSessionId && (
+            <select
+              value={model || MODEL_OPTIONS[0]}
+              onChange={(e) => {
+                const next = e.target.value;
+                sendToSession(currentSessionId, { type: "set_model", model: next });
+                useStore.getState().updateSession(currentSessionId, { model: next });
+              }}
+              className="hidden md:inline-flex h-7 text-[11px] rounded-md border border-cc-border bg-cc-card px-2 text-cc-muted focus:outline-none"
+              title="Change model"
+            >
+              {MODEL_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
+            </select>
+          )}
+
+          {currentSessionId && (
+            <select
+              value={sister}
+              onChange={(e) => useStore.getState().setSessionSister(currentSessionId, e.target.value)}
+              className="hidden lg:inline-flex h-7 text-[11px] rounded-md border border-cc-border bg-cc-card px-2 text-cc-muted focus:outline-none"
+              title="Sister advisory lens"
+            >
+              {SISTER_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
           )}
 
           <button
