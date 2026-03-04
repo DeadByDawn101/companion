@@ -461,6 +461,7 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
   const isNearBottom = useRef(true);
   const [elapsed, setElapsed] = useState(0);
   const [search, setSearch] = useState("");
+  const [exportMode, setExportMode] = useState<"plain"|"worklog">("plain");
 
   const filteredMessages = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -495,27 +496,48 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
     }
   }, [messages.length, streamingText]);
 
-  function exportMarkdown() {
+  function exportMarkdown(mode: "plain"|"worklog" = exportMode) {
     const lines: string[] = [];
-    lines.push(`# Camila Session Export`);
-    lines.push("");
-    lines.push(`- session: ${sessionId}`);
-    lines.push(`- exported: ${new Date().toISOString()}`);
-    lines.push("");
-    for (const m of messages) {
-      const role = m.role.toUpperCase();
-      lines.push(`## ${role}`);
-      if (m.content) lines.push(m.content);
+    if (mode === "worklog") {
+      lines.push(`# Camila Worklog`);
       lines.push("");
+      lines.push(`- session: ${sessionId}`);
+      lines.push(`- exported: ${new Date().toISOString()}`);
+      lines.push("");
+      for (const m of messages) {
+        const role = m.role.toUpperCase();
+        if (role === "SYSTEM") continue;
+        lines.push(`### ${role}`);
+        if (m.content) lines.push(m.content);
+        lines.push("");
+      }
+      lines.push(`---`);
+      lines.push(`## Summary`);
+      lines.push(`- Wins:`);
+      lines.push(`- Risks:`);
+      lines.push(`- Next actions:`);
+    } else {
+      lines.push(`# Camila Session Export`);
+      lines.push("");
+      lines.push(`- session: ${sessionId}`);
+      lines.push(`- exported: ${new Date().toISOString()}`);
+      lines.push("");
+      for (const m of messages) {
+        const role = m.role.toUpperCase();
+        lines.push(`## ${role}`);
+        if (m.content) lines.push(m.content);
+        lines.push("");
+      }
     }
     const blob = new Blob([lines.join("\n")], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `camila-session-${sessionId.slice(0,8)}.md`;
+    a.download = mode === "worklog" ? `camila-worklog-${sessionId.slice(0,8)}.md` : `camila-session-${sessionId.slice(0,8)}.md`;
     a.click();
     URL.revokeObjectURL(url);
   }
+
 
   if (messages.length === 0 && !streamingText) {
     return (
@@ -552,7 +574,11 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
                 placeholder="Search this chat..."
                 className="flex-1 h-8 px-2.5 text-xs rounded-lg border border-cc-border bg-cc-card text-cc-fg placeholder:text-cc-muted focus:outline-none focus:border-cc-primary/30"
               />
-              <button onClick={exportMarkdown} className="h-8 px-2.5 text-xs rounded-lg border border-cc-border hover:bg-cc-hover text-cc-muted hover:text-cc-fg cursor-pointer">Export .md</button>
+              <select value={exportMode} onChange={(e) => setExportMode(e.target.value as "plain"|"worklog")} className="h-8 px-2 text-xs rounded-lg border border-cc-border bg-cc-card text-cc-muted focus:outline-none">
+                <option value="plain">Plain</option>
+                <option value="worklog">Worklog</option>
+              </select>
+              <button onClick={() => exportMarkdown()} className="h-8 px-2.5 text-xs rounded-lg border border-cc-border hover:bg-cc-hover text-cc-muted hover:text-cc-fg cursor-pointer">Export .md</button>
             </div>
           </div>
           <CopyAllButton sessionId={sessionId} />

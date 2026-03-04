@@ -22,6 +22,7 @@ export function Sidebar() {
   const [showArchived, setShowArchived] = useState(false);
   const [confirmArchiveId, setConfirmArchiveId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [hiddenSessionIds, setHiddenSessionIds] = useState<Set<string>>(new Set());
   const [favoriteSessionIds, setFavoriteSessionIds] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem("cc-favorite-sessions") || "[]")); } catch { return new Set(); }
@@ -259,6 +260,10 @@ export function Sidebar() {
   const filteredSessionList = useMemo(() => {
     // Hide optimistically archived sessions
     let list = allSessionList.filter((s) => !hiddenSessionIds.has(s.id));
+    // Apply favorites filter
+    if (showFavoritesOnly) {
+      list = list.filter((s) => favoriteSessionIds.has(s.id));
+    }
     // Apply search filter
     if (debouncedSearch.trim()) {
       const q = debouncedSearch.toLowerCase();
@@ -274,7 +279,7 @@ export function Sidebar() {
       });
     }
     return list;
-  }, [allSessionList, hiddenSessionIds, debouncedSearch, sessionNames]);
+  }, [allSessionList, hiddenSessionIds, debouncedSearch, sessionNames, showFavoritesOnly, favoriteSessionIds]);
 
   const activeSessions = filteredSessionList.filter((s) => !s.archived);
   const archivedSessions = filteredSessionList.filter((s) => s.archived);
@@ -487,6 +492,15 @@ export function Sidebar() {
 
       {/* Session search */}
       <div className="px-4 pb-2">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[10px] text-cc-muted uppercase tracking-wide">Sessions</span>
+          <button
+            onClick={() => setShowFavoritesOnly((v) => !v)}
+            className={`text-[10px] px-2 py-0.5 rounded-md border transition-colors ${showFavoritesOnly ? "border-amber-500/40 text-amber-500 bg-amber-500/10" : "border-cc-border text-cc-muted hover:text-cc-fg hover:bg-cc-hover"}`}
+          >
+            {showFavoritesOnly ? "Favorites only" : "All"}
+          </button>
+        </div>
         <div className="relative">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-cc-muted pointer-events-none">
             <circle cx="7" cy="7" r="4.5" />
