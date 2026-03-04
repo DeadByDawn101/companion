@@ -10,6 +10,7 @@ import { Playground } from "./components/Playground.js";
 import { ToastContainer } from "./components/Toast.js";
 import { Lightbox } from "./components/Lightbox.js";
 import { CommandPalette } from "./components/CommandPalette.js";
+import { BRAND_NAME } from "./config.js";
 
 function useHash() {
   return useSyncExternalStore(
@@ -87,6 +88,10 @@ export default function App() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
+
+  useEffect(() => {
+    document.title = BRAND_NAME;
+  }, []);
 
   // Cmd+B to toggle sidebar, Cmd+K for command palette
   useEffect(() => {

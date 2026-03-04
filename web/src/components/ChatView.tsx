@@ -4,6 +4,7 @@ import { api } from "../api.js";
 import { MessageFeed } from "./MessageFeed.js";
 import { Composer } from "./Composer.js";
 import { PermissionBanner } from "./PermissionBanner.js";
+import { BRAND_NAME } from "../config.js";
 
 export function ChatView({ sessionId }: { sessionId: string }) {
   const sessionPerms = useStore((s) => s.pendingPermissions.get(sessionId));
@@ -64,7 +65,7 @@ export function ChatView({ sessionId }: { sessionId: string }) {
 
       <div className="px-4 py-1.5 border-b border-cc-border/60 bg-cc-card/50">
         <span className="inline-flex items-center gap-1.5 text-[11px] px-2 py-0.5 rounded-md bg-cc-primary/10 text-cc-primary">
-          Camila core {sister !== "camila" ? `· ${sister} advisory` : "· direct"}
+          {BRAND_NAME} core {sister !== "camila" ? `· ${sister} advisory` : "· direct"}
         </span>
       </div>
 

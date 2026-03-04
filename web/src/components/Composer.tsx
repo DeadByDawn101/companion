@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useStore } from "../store.js";
 import { sendToSession } from "../ws.js";
 import { api } from "../api.js";
+import { BRAND_NAME } from "../config.js";
 
 let idCounter = 0;
 
@@ -362,7 +363,7 @@ export function Composer({ sessionId }: { sessionId: string }) {
             onChange={handleInput}
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}
-            placeholder={isConnected ? "Message Camila… (/ for commands)" : "Waiting for CLI connection..."}
+            placeholder={isConnected ? `Message ${BRAND_NAME}… (/ for commands)` : "Waiting for CLI connection..."}
             disabled={!isConnected}
             rows={1}
             className="w-full px-4 pt-3 pb-1 text-sm bg-transparent resize-none focus:outline-none text-cc-fg font-sans-ui placeholder:text-cc-muted disabled:opacity-50"

@@ -5,6 +5,7 @@ import { connectSession, waitForConnection, sendToSession } from "../ws.js";
 import { disconnectSession } from "../ws.js";
 import { generateUniqueSessionName } from "../utils/names.js";
 import { EnvManager } from "./EnvManager.js";
+import { BRAND_NAME, BRAND_TAGLINE, IS_OPENCLAW_VARIANT } from "../config.js";
 
 interface ImageAttachment {
   name: string;
@@ -149,6 +150,7 @@ export function HomePage() {
       }
     }).catch(() => {});
     api.listEnvs().then(setEnvs).catch(() => {});
+    if (!IS_OPENCLAW_VARIANT) return;
     refreshOpenClaw();
     const t = setInterval(refreshOpenClaw, 15000);
     return () => clearInterval(t);
@@ -350,15 +352,15 @@ export function HomePage() {
         {/* Title */}
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="font-display text-3xl sm:text-4xl font-semibold text-cc-fg tracking-tight mb-2" style={{ fontVariationSettings: "'SOFT' 100, 'WONK' 1" }}>
-            Camila
+            {BRAND_NAME}
           </h1>
           <p className="text-sm text-cc-muted font-sans-ui">
-            Claude-grade flow, Camila identity.
+            {BRAND_TAGLINE}
           </p>
         </div>
 
 
-        {openclawHealth && (
+        {IS_OPENCLAW_VARIANT && openclawHealth && (
           <div className={`mb-4 rounded-xl border px-4 py-3 text-sm ${openclawHealth.ok ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200" : "border-rose-500/30 bg-rose-500/10 text-rose-200"}`}>
             <div className="font-medium">OpenClaw Bridge: {openclawHealth.ok ? "Connected" : "Disconnected"}</div>
             <div className="opacity-80">mode={openclawHealth.mode} • {openclawHealth.gatewayUrl}</div>
@@ -946,7 +948,7 @@ export function HomePage() {
             </select>
           </div>
           <div className="flex items-center rounded-lg border border-cc-border bg-cc-card px-3 py-2 text-[12px] text-cc-muted">
-            Always Camila core. Sister acts as advisory lens.
+            Always core voice. Sister acts as advisory lens.
           </div>
         </div>
 

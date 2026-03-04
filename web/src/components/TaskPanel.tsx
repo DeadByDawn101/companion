@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useStore } from "../store.js";
 import type { TaskItem } from "../types.js";
+import { BRAND_NAME } from "../config.js";
 
 const EMPTY_TASKS: TaskItem[] = [];
 
@@ -82,7 +83,7 @@ export function TaskPanel({ sessionId }: { sessionId: string }) {
           {/* Voice */}
           <div className="flex items-center justify-between">
             <span className="text-[11px] text-cc-muted uppercase tracking-wider font-medium">Voice</span>
-            <span className="text-[11px] font-medium text-cc-fg font-mono-code">camila + {sister}</span>
+            <span className="text-[11px] font-medium text-cc-fg font-mono-code">{BRAND_NAME.toLowerCase()} + {sister}</span>
           </div>
 
           {/* Model */}
@@ -115,7 +116,7 @@ ${(session.skills || []).join("\n")}`;
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = `camila-capabilities-${sessionId.slice(0,8)}.txt`;
+                a.download = `${BRAND_NAME.toLowerCase()}-capabilities-${sessionId.slice(0,8)}.txt`;
                 a.click();
                 URL.revokeObjectURL(url);
               }}

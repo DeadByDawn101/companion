@@ -4,6 +4,7 @@ import { MessageBubble } from "./MessageBubble.js";
 import { getToolIcon, getToolLabel, getToolBorderColor, getPreview, ToolIcon } from "./ToolBlock.js";
 import { sendToSession } from "../ws.js";
 import type { ChatMessage, ContentBlock } from "../types.js";
+import { BRAND_NAME } from "../config.js";
 
 function formatElapsed(ms: number): string {
   const secs = Math.floor(ms / 1000);
@@ -499,7 +500,7 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
   function exportMarkdown(mode: "plain"|"worklog" = exportMode) {
     const lines: string[] = [];
     if (mode === "worklog") {
-      lines.push(`# Camila Worklog`);
+      lines.push(`# ${BRAND_NAME} Worklog`);
       lines.push("");
       lines.push(`- session: ${sessionId}`);
       lines.push(`- exported: ${new Date().toISOString()}`);
@@ -517,7 +518,7 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
       lines.push(`- Risks:`);
       lines.push(`- Next actions:`);
     } else {
-      lines.push(`# Camila Session Export`);
+      lines.push(`# ${BRAND_NAME} Session Export`);
       lines.push("");
       lines.push(`- session: ${sessionId}`);
       lines.push(`- exported: ${new Date().toISOString()}`);
@@ -533,7 +534,7 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = mode === "worklog" ? `camila-worklog-${sessionId.slice(0,8)}.md` : `camila-session-${sessionId.slice(0,8)}.md`;
+    a.download = mode === "worklog" ? `${BRAND_NAME.toLowerCase()}-worklog-${sessionId.slice(0,8)}.md` : `${BRAND_NAME.toLowerCase()}-session-${sessionId.slice(0,8)}.md`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -551,7 +552,7 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
         <div className="text-center">
           <p className="text-sm text-cc-fg font-medium mb-1 font-display">Start a conversation</p>
           <p className="text-xs text-cc-muted leading-relaxed">
-            Start with a prompt — Camila will run with it.
+            Start with a prompt — {BRAND_NAME} will run with it.
           </p>
         </div>
       </div>

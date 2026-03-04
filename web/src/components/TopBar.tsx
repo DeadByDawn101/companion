@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useStore } from "../store.js";
 import { api } from "../api.js";
 import { sendToSession } from "../ws.js";
+import { BRAND_NAME } from "../config.js";
 
 const isElectron = !!(window as any).electronAPI?.isElectron;
 
@@ -124,7 +125,7 @@ export function TopBar() {
 
           {/* Identity badge */}
           <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-md bg-cc-primary/10 text-[11px] font-medium text-cc-primary">
-            Camila · Claude-style
+            {BRAND_NAME} · Claude-style
           </span>
 
           {/* Model badge */}
