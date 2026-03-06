@@ -39,3 +39,23 @@ Key behavior:
 - `camila-openclaw` (OpenClaw)
 
 Both can be deployed as the same repo with different env files.
+
+
+## 3) RavenX Pro variant (OpenClaw + Crew)
+
+Use this for RavenX product packaging with coworker workflows on top of Companion.
+
+```bash
+cd web
+cp .env.openclaw.example .env
+# then enable flags
+# CREW_MODE=assist
+# CREW_PROFILE=ravenx
+bun install
+bun run dev
+```
+
+Key behavior:
+- OpenClaw bridge enabled
+- Companion session UX + tool approvals
+- Crew integration lane enabled for coworker-style task flow

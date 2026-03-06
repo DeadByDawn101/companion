@@ -44,6 +44,8 @@ Open [localhost:3456](http://localhost:3456).
 
 **Desktop app** — Electron wrapper available for macOS, Windows, and Linux.
 
+**RavenX Pro lane (scaffold)** — Optional Crew integration path for coworker-style workflows in macOS build.
+
 ## How it works
 
 The Claude Code CLI has a hidden `--sdk-url` flag. When set, it connects to a WebSocket server instead of running in a terminal. The protocol is NDJSON (newline-delimited JSON). Companion sits in the middle and bridges that protocol to the browser.
