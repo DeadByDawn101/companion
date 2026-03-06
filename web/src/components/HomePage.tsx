@@ -107,6 +107,7 @@ export function HomePage() {
   const [openclawSessionCount, setOpenclawSessionCount] = useState<number | null>(null);
   const [openclawRelayUrl, setOpenclawRelayUrl] = useState<string>("");
   const [openclawSessions, setOpenclawSessions] = useState<Array<Record<string, unknown>>>([]);
+  const [openclawPairing, setOpenclawPairing] = useState<{ ok: boolean; pendingDevices: number; pairedDevices: number; pendingRequests: number; connectReady: boolean } | null>(null);
 
   // Environment state
   const [envs, setEnvs] = useState<CompanionEnv[]>([]);
@@ -149,6 +150,7 @@ export function HomePage() {
     api.getOpenClawHealth().then((h) => setOpenclawHealth({ ok: h.ok, gatewayUrl: h.gatewayUrl, mode: h.mode })).catch(() => setOpenclawHealth(null));
     api.getOpenClawConfig().then((cfg) => setOpenclawRelayUrl(cfg.relayUrl || "")).catch(() => {});
     api.getOpenClawSessions().then((d) => { setOpenclawSessionCount(d.count); setOpenclawSessions(d.sessions || []); }).catch(() => { setOpenclawSessionCount(null); setOpenclawSessions([]); });
+    api.getOpenClawPairingStatus().then((p) => setOpenclawPairing(p)).catch(() => setOpenclawPairing(null));
   }, []);
 
   // Auto-focus textarea
@@ -296,8 +298,8 @@ export function HomePage() {
     setError("");
 
     // OpenClaw-first guardrail for retail onboarding flow
-    if (IS_OPENCLAW_VARIANT && openclawHealth && !openclawHealth.ok) {
-      setError("OpenClaw is not connected yet. Open OpenClaw app, approve this device, then press Refresh.");
+    if (IS_OPENCLAW_VARIANT && openclawHealth && (!openclawHealth.ok || (openclawPairing && !openclawPairing.connectReady))) {
+      setError("OpenClaw is not fully connected yet. Open OpenClaw app, approve this device, then press Refresh.");
       setSending(false);
       return;
     }
@@ -387,7 +389,10 @@ export function HomePage() {
             <div className="font-medium">{openclawHealth.ok ? "Connected to OpenClaw" : "Connect OpenClaw"}</div>
             <div className="opacity-80">mode={openclawHealth.mode} • {openclawHealth.gatewayUrl}</div>
             <div className="opacity-80">sessions: {openclawSessionCount ?? "n/a"}</div>
-            {!openclawHealth.ok && (
+            {openclawPairing && (
+              <div className="opacity-80">pairing: {openclawPairing.connectReady ? "approved" : "pending"} • paired={openclawPairing.pairedDevices} • requests={openclawPairing.pendingRequests}</div>
+            )}
+            {(!openclawHealth.ok || (openclawPairing && !openclawPairing.connectReady)) && (
               <div className="mt-2 text-xs opacity-90">
                 1) Start OpenClaw app/gateway  2) Approve this device  3) Refresh connection
               </div>

@@ -104,6 +104,14 @@ export interface OpenClawSessionList {
   sessions: Array<Record<string, unknown>>;
 }
 
+export interface OpenClawPairingStatus {
+  ok: boolean;
+  pendingDevices: number;
+  pairedDevices: number;
+  pendingRequests: number;
+  connectReady: boolean;
+}
+
 export interface OpenClawHealth {
   ok: boolean;
   gatewayUrl: string;
@@ -184,4 +192,5 @@ export const api = {
   getOpenClawHealth: () => get<OpenClawHealth>("/openclaw/health"),
   getOpenClawConfig: () => get<{ mode: string; gatewayUrl: string; relayUrl: string | null }>("/openclaw/config"),
   getOpenClawSessions: () => get<OpenClawSessionList>("/openclaw/sessions"),
+  getOpenClawPairingStatus: () => get<OpenClawPairingStatus>("/openclaw/pairing-status"),
 };

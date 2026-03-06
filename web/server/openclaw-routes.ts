@@ -28,6 +28,42 @@ function listOpenClawSessions() {
   }
 }
 
+
+
+function getPairingStatus() {
+  try {
+    const devicesOut = execFileSync("openclaw", ["devices", "list", "--json"], { encoding: "utf-8", timeout: 8000 });
+    const devices = JSON.parse(devicesOut || "{}");
+    const pendingDevices = Array.isArray(devices?.pending) ? devices.pending : [];
+    const pairedDevices = Array.isArray(devices?.paired) ? devices.paired : [];
+
+    let pendingRequests: unknown[] = [];
+    try {
+      const pairingOut = execFileSync("openclaw", ["pairing", "list", "--json"], { encoding: "utf-8", timeout: 8000 });
+      const pairing = JSON.parse(pairingOut || "{}");
+      pendingRequests = Array.isArray(pairing?.requests) ? pairing.requests : [];
+    } catch {
+      pendingRequests = [];
+    }
+
+    return {
+      ok: true,
+      pendingDevices: pendingDevices.length,
+      pairedDevices: pairedDevices.length,
+      pendingRequests: pendingRequests.length,
+      connectReady: pairedDevices.length > 0,
+    };
+  } catch {
+    return {
+      ok: false,
+      pendingDevices: 0,
+      pairedDevices: 0,
+      pendingRequests: 0,
+      connectReady: false,
+    };
+  }
+}
+
 async function tcpProbe(host: string, port: number, timeoutMs = 2500): Promise<boolean> {
   return new Promise((resolve) => {
     const socket = new net.Socket();
@@ -69,6 +105,12 @@ export function createOpenClawRoutes() {
   api.get("/sessions", (c) => {
     const sessions = listOpenClawSessions();
     return c.json({ count: sessions.length, sessions });
+  });
+
+
+  api.get("/pairing-status", (c) => {
+    const status = getPairingStatus();
+    return c.json(status, status.ok ? 200 : 503);
   });
 
   api.get("/config", (c) => {
