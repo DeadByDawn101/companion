@@ -78,6 +78,20 @@ function shortenPath(fullPath: string): string {
   return fullPath;
 }
 
+function humanizeLaunchError(err: string): string {
+  const t = (err || "").toLowerCase();
+  if (t.includes("not logged in") || t.includes("/login")) {
+    return "Connection needed: OpenClaw is on, but your coding engine session is not authenticated yet. Open OpenClaw Dashboard and complete device/account connect, then retry.";
+  }
+  if (t.includes("cannot be launched inside another claude code session") || t.includes("nested")) {
+    return "Nested session blocked. Restart Companion from a normal terminal (not inside an active Claude/OpenClaw agent shell).";
+  }
+  if (t.includes("too many arguments for 'sessions'")) {
+    return "OpenClaw bridge command mismatch detected. Please pull latest Companion and retry.";
+  }
+  return err;
+}
+
 let idCounter = 0;
 
 export function HomePage() {
@@ -339,7 +353,8 @@ export function HomePage() {
         timestamp: Date.now(),
       });
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : String(e));
+      const raw = e instanceof Error ? e.message : String(e);
+      setError(humanizeLaunchError(raw));
       setSending(false);
     }
   }
@@ -362,12 +377,17 @@ export function HomePage() {
 
         {IS_OPENCLAW_VARIANT && openclawHealth && (
           <div className={`mb-4 rounded-xl border px-4 py-3 text-sm ${openclawHealth.ok ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200" : "border-rose-500/30 bg-rose-500/10 text-rose-200"}`}>
-            <div className="font-medium">OpenClaw Bridge: {openclawHealth.ok ? "Connected" : "Disconnected"}</div>
+            <div className="font-medium">{openclawHealth.ok ? "Connected to OpenClaw" : "Connect OpenClaw"}</div>
             <div className="opacity-80">mode={openclawHealth.mode} • {openclawHealth.gatewayUrl}</div>
             <div className="opacity-80">sessions: {openclawSessionCount ?? "n/a"}</div>
+            {!openclawHealth.ok && (
+              <div className="mt-2 text-xs opacity-90">
+                1) Start OpenClaw app/gateway  2) Approve this device  3) Refresh connection
+              </div>
+            )}
             <div className="mt-2 flex items-center gap-3">
               {openclawRelayUrl && (
-                <a className="underline" href={`${openclawRelayUrl.replace(/\/$/,"")}/overview`} target="_blank" rel="noreferrer">Open OpenClaw Overview</a>
+                <a className="underline" href={`${openclawRelayUrl.replace(/\/$/,"")}/overview`} target="_blank" rel="noreferrer">Open Dashboard</a>
               )}
               <button onClick={refreshOpenClaw} className="text-xs underline opacity-90 hover:opacity-100">Refresh</button>
             </div>
