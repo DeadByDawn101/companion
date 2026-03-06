@@ -452,17 +452,21 @@ ${MARKER_END}`;
         const text = decoder.decode(value);
         if (text.trim()) {
           const trimmed = text.trimEnd();
-          log(`[session:${sessionId}:${label}] ${trimmed}`);
+          const low = trimmed.toLowerCase();
 
           // Detect auth-required failures to prevent infinite relaunch loops.
-          const low = trimmed.toLowerCase();
-          if (
+          const isAuthOrNested =
             low.includes('not logged in') ||
             low.includes('please run /login') ||
-            low.includes('cannot be launched inside another claude code session')
-          ) {
+            low.includes('cannot be launched inside another claude code session');
+
+          if (isAuthOrNested) {
             const info = this.sessions.get(sessionId);
             if (info) info.authRequired = true;
+            // Suppress raw /login spam in logs; emit retail-friendly guidance once.
+            log(`[session:${sessionId}:${label}] Session engine requires authentication/connect. Use OpenClaw connect flow in-app.`);
+          } else {
+            log(`[session:${sessionId}:${label}] ${trimmed}`);
           }
         }
       }
