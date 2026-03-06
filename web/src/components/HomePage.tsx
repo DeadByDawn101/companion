@@ -295,6 +295,13 @@ export function HomePage() {
     setSending(true);
     setError("");
 
+    // OpenClaw-first guardrail for retail onboarding flow
+    if (IS_OPENCLAW_VARIANT && openclawHealth && !openclawHealth.ok) {
+      setError("OpenClaw is not connected yet. Open OpenClaw app, approve this device, then press Refresh.");
+      setSending(false);
+      return;
+    }
+
     try {
       // Disconnect current session if any
       if (currentSessionId) {

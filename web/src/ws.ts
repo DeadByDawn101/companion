@@ -91,6 +91,19 @@ function getWsUrl(sessionId: string): string {
   return `${proto}//${location.host}/ws/browser/${sessionId}`;
 }
 
+
+
+function humanizeAuthText(text: string): string {
+  const t = (text || '').toLowerCase();
+  if (t.includes('please run /login') || t.includes('not logged in')) {
+    return 'Connection needed: OpenClaw is reachable, but this session engine is not authenticated yet. Open OpenClaw app/dashboard and complete connect, then retry.';
+  }
+  if (t.includes('cannot be launched inside another claude code session') || t.includes('nested sessions')) {
+    return 'Session start blocked: launch Companion from a normal terminal (not inside an active Claude/OpenClaw agent shell).';
+  }
+  return text;
+}
+
 function extractTextFromBlocks(blocks: ContentBlock[]): string {
   return blocks
     .map((b) => {
@@ -221,7 +234,7 @@ function handleMessage(sessionId: string, event: MessageEvent) {
         store.appendMessage(sessionId, {
           id: nextId(),
           role: "system",
-          content: `Error: ${r.errors.join(", ")}`,
+          content: humanizeAuthText(`Error: ${r.errors.join(", ")}`),
           timestamp: Date.now(),
         });
       }
@@ -272,7 +285,7 @@ function handleMessage(sessionId: string, event: MessageEvent) {
         store.appendMessage(sessionId, {
           id: nextId(),
           role: "system",
-          content: `Auth error: ${data.error}`,
+          content: humanizeAuthText(`Auth error: ${data.error}`),
           timestamp: Date.now(),
         });
       }
@@ -333,7 +346,7 @@ function handleMessage(sessionId: string, event: MessageEvent) {
             chatMessages.push({
               id: nextId(),
               role: "system",
-              content: `Error: ${r.errors.join(", ")}`,
+              content: humanizeAuthText(`Error: ${r.errors.join(", ")}`),
               timestamp: Date.now(),
             });
           }
