@@ -19,7 +19,7 @@ function parseGateway(url: string) {
 
 function listOpenClawSessions() {
   try {
-    const out = execFileSync("openclaw", ["sessions", "list", "--json"], { encoding: "utf-8", timeout: 8000 });
+    const out = execFileSync("openclaw", ["sessions", "--json"], { encoding: "utf-8", timeout: 8000 });
     const parsed = JSON.parse(out);
     if (Array.isArray(parsed)) return parsed;
     return parsed?.sessions || [];

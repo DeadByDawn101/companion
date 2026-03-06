@@ -219,11 +219,16 @@ export class CliLauncher {
     }
     args.push("-p", "");
 
-    const env: Record<string, string> = {
+    const baseEnv: Record<string, string> = {
       ...process.env as Record<string, string>,
-      CLAUDECODE: "1",
       ...options.env,
     };
+
+    // IMPORTANT: prevent nested Claude Code session crashes when Companion
+    // is launched from within an existing Claude/OpenClaw runtime shell.
+    delete baseEnv.CLAUDECODE;
+
+    const env: Record<string, string> = baseEnv;
 
     console.log(`[cli-launcher] Spawning session ${sessionId}: ${binary} ${args.join(" ")}`);
 
