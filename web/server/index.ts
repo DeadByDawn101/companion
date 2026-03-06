@@ -39,6 +39,10 @@ wsBridge.onCLIRelaunchNeededCallback(async (sessionId) => {
   if (relaunchingSet.has(sessionId)) return;
   const info = launcher.getSession(sessionId);
   if (info?.archived) return;
+  if (info?.authRequired) {
+    console.log(`[server] Skipping auto-relaunch for ${sessionId}: auth required`);
+    return;
+  }
   if (info && info.state !== "starting") {
     relaunchingSet.add(sessionId);
     console.log(`[server] Auto-relaunching CLI for session ${sessionId}`);
@@ -142,7 +146,7 @@ if (starting.length > 0) {
   setTimeout(async () => {
     const stale = launcher.getStartingSessions();
     for (const info of stale) {
-      if (info.archived) continue;
+      if (info.archived || info.authRequired) continue;
       console.log(`[server] CLI for session ${info.sessionId} did not reconnect, relaunching...`);
       await launcher.relaunch(info.sessionId);
     }

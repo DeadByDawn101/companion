@@ -17,6 +17,8 @@ export interface SdkSessionInfo {
   /** The CLI's internal session ID (from system.init), used for --resume */
   cliSessionId?: string;
   archived?: boolean;
+  /** Session needs interactive login before it can run. */
+  authRequired?: boolean;
   /** Whether this session uses a git worktree */
   isWorktree?: boolean;
   /** The original repo root path */
@@ -240,6 +242,7 @@ export class CliLauncher {
     });
 
     info.pid = proc.pid;
+    info.authRequired = false;
     this.processes.set(sessionId, proc);
 
     // Stream stdout/stderr for debugging
@@ -448,7 +451,19 @@ ${MARKER_END}`;
         if (done) break;
         const text = decoder.decode(value);
         if (text.trim()) {
-          log(`[session:${sessionId}:${label}] ${text.trimEnd()}`);
+          const trimmed = text.trimEnd();
+          log(`[session:${sessionId}:${label}] ${trimmed}`);
+
+          // Detect auth-required failures to prevent infinite relaunch loops.
+          const low = trimmed.toLowerCase();
+          if (
+            low.includes('not logged in') ||
+            low.includes('please run /login') ||
+            low.includes('cannot be launched inside another claude code session')
+          ) {
+            const info = this.sessions.get(sessionId);
+            if (info) info.authRequired = true;
+          }
         }
       }
     } catch {
